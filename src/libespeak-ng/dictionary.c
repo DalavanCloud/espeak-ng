@@ -35,6 +35,7 @@
 #include "phoneme.h"
 #include "synthesize.h"
 #include "translate.h"
+#include <crtdbg.h>
 
 int dictionary_skipwords;
 char dictionary_name[40];
@@ -254,8 +255,11 @@ int LoadDictionary(Translator *tr, const char *name, int no_error)
 
 	for (hash = 0; hash < N_HASH_DICT; hash++) {
 		tr->dict_hashtab[hash] = p;
-		while ((length = *p) != 0)
+		while ((length = *p) != 0) {
+			_ASSERTE(length > 0);
 			p += length;
+			_ASSERTE(p < tr->data_dictrules); // tr->data_dictrules is at &(tr->data_dictlist[length]), assuming that hashes should not go past this point
+		}
 		p++; // skip over the zero which terminates the list for this hash value
 	}
 

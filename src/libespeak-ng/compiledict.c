@@ -31,6 +31,7 @@
 #include <espeak-ng/espeak_ng.h>
 #include <espeak-ng/speak_lib.h>
 #include <espeak-ng/encoding.h>
+#include <crtdbg.h>
 
 #include "error.h"
 #include "speech.h"
@@ -663,11 +664,14 @@ static void compile_dictlist_start(void)
 
 	for (ix = 0; ix < N_HASH_DICT; ix++) {
 		p = hash_chains[ix];
+		int actualCount = 0;
 		while (p != NULL) {
+			++actualCount;
 			memcpy(&p2, p, sizeof(char *));
 			free(p);
 			p = p2;
 		}
+		_ASSERTE(hash_counts[ix] == actualCount);
 		hash_chains[ix] = NULL;
 		hash_counts[ix] = 0;
 	}
@@ -682,13 +686,22 @@ static void compile_dictlist_end(FILE *f_out)
 
 	for (hash = 0; hash < N_HASH_DICT; hash++) {
 		p = hash_chains[hash];
-		hash_counts[hash] = (int)ftell(f_out);
+		// hash_count is never read from, so this line is not used. Comment it out
+		// since it stops us from verifing that the count matches actual count when
+		// running through the compile_dictlist_start function.
+		//hash_counts[hash] = (int)ftell(f_out);
+		int actualCount = 0;
 
 		while (p != NULL) {
+			++actualCount;
 			length = *(p+sizeof(char *));
-			fwrite(p+sizeof(char *), length, 1, f_out);
+			// The following assert gets triggered for dict 'bn' and hash 497.
+			// Value is -117 (signed) / 4294967179 (unsigned) and actualCount is 1
+			_ASSERTE(length >= 0);
+			fwrite(p+sizeof(char *), length, 1, f_out); // fwrite was causing an exception with the unsigned value.
 			memcpy(&p, p, sizeof(char *));
 		}
+		_ASSERTE(hash_counts[hash] == actualCount);
 		fputc(0, f_out);
 	}
 }
@@ -723,6 +736,7 @@ static int compile_dictlist_file(const char *path, const char *filename)
 		linenum++;
 
 		length = compile_line(buf, dict_line, sizeof(dict_line), &hash);
+		_ASSERTE(length >= 0);
 		if (length == 0)  continue; // blank line
 
 		hash_counts[hash]++;

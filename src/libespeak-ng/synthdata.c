@@ -428,7 +428,7 @@ void LoadConfig(void)
 			ix = sscanf(&buf[10], "_%c %s", &c1, string);
 			if (ix == 2) {
 				soundicon_tab[n_soundicon_tab].name = c1;
-				soundicon_tab[n_soundicon_tab].filename = strdup(string);
+				soundicon_tab[n_soundicon_tab].filename = _strdup(string);
 				soundicon_tab[n_soundicon_tab++].length = 0;
 			}
 		}

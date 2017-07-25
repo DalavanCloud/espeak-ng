@@ -23,7 +23,7 @@
 
 #include <string.h>
 
-#define strcasecmp stricmp
+#define strcasecmp _stricmp
 
 #else
 #pragma GCC system_header // Silence "warning: #include_next is a GCC extension"

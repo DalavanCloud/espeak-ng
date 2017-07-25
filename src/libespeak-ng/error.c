@@ -45,7 +45,7 @@ create_file_error_context(espeak_ng_ERROR_CONTEXT *context,
 				return ENOMEM;
 		}
 		(*context)->type = ERROR_CONTEXT_FILE;
-		(*context)->name = strdup(filename);
+		(*context)->name = _strdup(filename);
 		(*context)->version = 0;
 		(*context)->expected_version = 0;
 	}
@@ -67,7 +67,7 @@ create_version_mismatch_error_context(espeak_ng_ERROR_CONTEXT *context,
 				return ENOMEM;
 		}
 		(*context)->type = ERROR_CONTEXT_VERSION;
-		(*context)->name = strdup(path_home);
+		(*context)->name = _strdup(path_home);
 		(*context)->version = version;
 		(*context)->expected_version = expected_version;
 	}
